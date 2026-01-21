@@ -1,5 +1,6 @@
 import os
 import pickle
+import json
 
 from dotenv import load_dotenv
 from google import genai
@@ -75,17 +76,32 @@ def main():
 
     # Prompt for a new input
     while True:
-        print('User: (\X to exit, \S to save current chat history)')
+        print('User: (\X exit, \S save chat history, \T dump history as JSON)')
         request = input('> ')
+        
+        # Exit on request
         if request == '\X':
             print('Exiting')
             break
+
+        # Save as proper data structure (pickle file)
         elif request == '\S':
             chat_file = input('Name of the chat file: ')
             chat_file += '.cht'
             try:
                 with open(chat_file, 'wb') as f:
                     pickle.dump(chat.get_history(), f)
+            except:
+                print('Could not save chat.')
+
+        # Dump history in a json file
+        elif request == '\T':
+            chat_file = input('Name of the json file: ')
+            chat_file += '.json'
+            history_data = [content.model_dump() for content in chat.get_history()]
+            try:
+                with open(chat_file, 'w') as f:
+                    json.dump(history_data, f, indent=2, ensure_ascii=False)
             except:
                 print('Could not save chat.')
         else:
